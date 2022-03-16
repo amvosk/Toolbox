@@ -90,6 +90,8 @@ class SoundFeatures:
         self.step = step
         self.pad = pad
         
+        
+        
     def _pad_center(self, sound):
         return np.pad(sound, (math.floor((self.frame - self.step)/2), math.ceil((self.frame - self.step)/2)), 
                       mode='reflect', reflect_type='odd')
