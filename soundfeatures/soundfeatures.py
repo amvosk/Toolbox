@@ -203,18 +203,23 @@ def make_sound_features(sound, fs, frame, step, pad='center', lpc_order=10, lpc_
 
 def make_sound(voiced, pc, frame, step, fs, pitch, intensity=20):
     
+    downsample_coef = 1
     if frame != step:
         downsample_coef = frame // step
-        voiced = voiced[::downsample_coef]
         pc = pc[::downsample_coef]
-    source = np.zeros(voiced.shape[0]*frame)
-    print(source.shape)
-    for i in range(source.shape[0]):
-        if i % (fs // pitch) == 0:
-            source[i] = intensity
-    for i, state in enumerate(voiced):
-        if state == 0:
-            source[i*frame:(i+1)*frame] = np.random.normal(size=frame)
+        
+    if voiced is not None:
+        voiced = voiced[::downsample_coef]
+        source = np.zeros(voiced.shape[0]*frame)
+        print(source.shape)
+        for i in range(source.shape[0]):
+            if i % (fs // pitch) == 0:
+                source[i] = intensity
+        for i, state in enumerate(voiced):
+            if state == 0:
+                source[i*frame:(i+1)*frame] = np.random.normal(size=frame)
+    else:
+        source = np.random.normal(size=pc.shape[0]*frame)
     
     result = []
     coef = np.concatenate((np.ones((pc.shape[0], 1)), -pc), axis=1)
