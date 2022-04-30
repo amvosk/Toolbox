@@ -146,7 +146,6 @@ def make_sound_features(sound, fs, frame, step, pad='center', lpc_order=10, lpc_
 #         sound = np.pad(sound, (frame - step, 0), mode='reflect', reflect_type='odd')
     if pad == 'center':
         sound = np.pad(sound, (math.floor((frame - step)/2), math.ceil((frame - step)/2)), mode='reflect', reflect_type='odd')
-    n_sound_frames = (sound.shape[0] - frame + step) // step
 
     results = {}
     results['sound'] = sound
@@ -167,7 +166,6 @@ def make_sound_features(sound, fs, frame, step, pad='center', lpc_order=10, lpc_
         results[coef] = np.zeros((n_sound_frames, lpc_order))
     for i in range(n_sound_frames):
         sound_frame = sound[i*step:i*step + frame]
-#         print(sound_frame.shape)
         if lpc_window == 'hann':
             sound_frame = sound_frame * np.hanning(sound_frame.shape[0])
         ar, rc = librosa_ar_rc(sound_frame, order=lpc_order)
@@ -188,9 +186,9 @@ def make_sound_features(sound, fs, frame, step, pad='center', lpc_order=10, lpc_
     results['voiced'] = voiced
     if np.any(~np.isnan(f0)):
         pitch = np.mean(f0[(voiced_probs > pitch_thr) * ~np.isnan(f0)])
-        results['pitch'] = pitch
+        results['pitch'] = np.asarray(pitch)
     else:
-        results['pitch'] = librosa.note_to_hz('C3')
+        results['pitch'] = np.asarray(librosa.note_to_hz('C3'))
     
     # calculate logmelspectrogram and mfcc
     melspec = librosa.feature.melspectrogram(y=sound, sr=fs, n_fft=frame, hop_length=step, n_mels=step, fmin=mel_fmin, fmax=mel_fmax, center=False)
